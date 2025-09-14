@@ -42,6 +42,12 @@ class TestTextToNumber:
         assert text_to_number("two.") == 2
         assert text_to_number("three,") == 3
     
+    def test_with_and_word(self):
+        """Test text with 'and' word"""
+        assert text_to_number("one hundred and twenty-three") == 123
+        assert text_to_number("five hundred and twenty-three") == 523
+        assert text_to_number("two thousand and five") == 2005
+    
     def test_invalid_text(self):
         """Test invalid text inputs"""
         with pytest.raises(ValueError):

@@ -11,6 +11,10 @@ def text_to_number(text):
     # Clean and normalize the text
     text = re.sub(r'[^a-zA-Z\s-]', '', text.strip().lower())
     
+    # Remove "and" which is commonly used in English number expressions
+    text = re.sub(r'\band\b', '', text)
+    text = re.sub(r'\s+', ' ', text).strip()  # Clean up extra spaces
+    
     # Special case for zero
     if text in ['zero', 'nil']:
         return 0
