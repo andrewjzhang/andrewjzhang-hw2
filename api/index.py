@@ -15,57 +15,59 @@ def text_to_number(text):
     if text in ['zero', 'nil']:
         return 0
     
-    # Use inflect library for more comprehensive text to number conversion
-    p = inflect.engine()
+    # Comprehensive number word dictionary
+    number_words = {
+        'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
+        'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
+        'eleven': 11, 'twelve': 12, 'thirteen': 13, 'fourteen': 14, 'fifteen': 15,
+        'sixteen': 16, 'seventeen': 17, 'eighteen': 18, 'nineteen': 19, 'twenty': 20,
+        'thirty': 30, 'forty': 40, 'fifty': 50, 'sixty': 60, 'seventy': 70, 'eighty': 80, 'ninety': 90,
+        'hundred': 100, 'thousand': 1000, 'million': 1000000, 'billion': 1000000000
+    }
     
-    # Try to convert using inflect's word_to_number method
+    # Handle single word numbers
+    if text in number_words:
+        return number_words[text]
+    
+    # Parse complex number expressions
     try:
-        # inflect doesn't have direct word_to_number, so we'll use a more comprehensive approach
-        # First try simple dictionary for basic numbers
-        number_words = {
-            'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
-            'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
-            'eleven': 11, 'twelve': 12, 'thirteen': 13, 'fourteen': 14, 'fifteen': 15,
-            'sixteen': 16, 'seventeen': 17, 'eighteen': 18, 'nineteen': 19, 'twenty': 20,
-            'thirty': 30, 'forty': 40, 'fifty': 50, 'sixty': 60, 'seventy': 70, 'eighty': 80, 'ninety': 90,
-            'hundred': 100, 'thousand': 1000, 'million': 1000000
-        }
+        words = text.replace('-', ' ').split()
+        total = 0
+        current = 0
         
-        if text in number_words:
-            return number_words[text]
+        i = 0
+        while i < len(words):
+            word = words[i]
+            
+            if word not in number_words:
+                raise ValueError(f"Unknown word: {word}")
+            
+            value = number_words[word]
+            
+            if value == 100:
+                # Handle "hundred"
+                if current == 0:
+                    current = 1
+                current *= 100
+            elif value >= 1000:
+                # Handle "thousand", "million", "billion"
+                if current == 0:
+                    current = 1
+                total += current * value
+                current = 0
+            else:
+                # Handle basic numbers (1-99)
+                current += value
+            
+            i += 1
         
-        # Handle compound numbers like "forty two"
-        words = text.split()
-        if len(words) == 2:
-            if words[0] in number_words and words[1] in number_words:
-                # Handle cases like "forty two" = 40 + 2
-                first_val = number_words[words[0]]
-                second_val = number_words[words[1]]
-                if first_val >= 20 and first_val <= 90 and second_val <= 9:
-                    return first_val + second_val
+        total += current
+        return total
         
-        # Handle "one hundred twenty three" type patterns
-        if 'hundred' in words:
-            total = 0
-            i = 0
-            while i < len(words):
-                if words[i] in number_words:
-                    val = number_words[words[i]]
-                    if i + 1 < len(words) and words[i + 1] == 'hundred':
-                        total += val * 100
-                        i += 2
-                    else:
-                        total += val
-                        i += 1
-                else:
-                    i += 1
-            if total > 0:
-                return total
-                
-    except:
-        pass
+    except Exception as e:
+        raise ValueError(f"Unable to convert text to number: {str(e)}")
     
-    raise ValueError("Unable to convert text to number")
+    return total
 
 def number_to_text(number):
     """Convert integer to English text"""
