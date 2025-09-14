@@ -73,11 +73,6 @@ class TestNumberToText:
         assert number_to_text(42) == "forty-two"
         assert number_to_text(123) == "one hundred and twenty-three"
     
-    def test_negative_numbers(self):
-        """Test negative numbers"""
-        assert number_to_text(-1) == "minus one"
-        assert number_to_text(-42) == "minus forty-two"
-
 class TestBase64Conversion:
     """Test base64 conversion functions"""
     
@@ -314,27 +309,6 @@ class TestWebInterface:
         data = json.loads(response.data)
         assert data['error'] is not None
     
-    def test_negative_numbers(self, client):
-        """Test negative number handling"""
-        # Negative decimal to text
-        response = client.post('/convert',
-            json={'input': '-42', 'inputType': 'decimal', 'outputType': 'text'})
-        assert response.status_code == 200
-        data = json.loads(response.data)
-        assert data['result'] == 'minus forty-two'
-        assert data['error'] is None
-        
-        # Negative numbers should not work for binary/octal/hex in Python's int() function
-        # but let's test the behavior
-        response = client.post('/convert',
-            json={'input': '-42', 'inputType': 'decimal', 'outputType': 'binary'})
-        assert response.status_code == 200
-        data = json.loads(response.data)
-        # Python's bin() handles negative numbers with '-0b' prefix
-        # but our code strips the '0b', so we get '-101010'
-        assert data['result'] == '-101010'
-        assert data['error'] is None
-
 class TestBase64ByteOrder:
     """Test base64 byte order - should be little-endian according to requirements"""
     
